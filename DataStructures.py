@@ -5,7 +5,7 @@ from enum import Enum, auto
 from shapely import points
 
 # 日期类型：普通工作日|周五|周末|节前一天|节假日
-class date_type(Enum):
+class DataType(Enum):
     WORKDAY = auto()
     WEEKEND = auto()
     HOLIDAY = auto()
