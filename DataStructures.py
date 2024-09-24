@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from datetime import datetime, date
 from enum import Enum, auto
+from typing import List
+import DataStructureUtils as du
 
 from shapely import points
 
@@ -17,15 +19,22 @@ class DataType(Enum):
 # 一个数据点的所有属性
 @dataclass
 class DataPointProperties:
+
     def __init__(
-        self, pflow_in, timestamp, date_type, weather, operation_type, event_scale
+        self,
+        timestamp,
+        pflow_in,
+        # date_type: DataType,
+        # weather,
+        # operation_type,
+        # event_scale,
     ):
-        self.pflow_in = pflow_in
         self.timestamp = timestamp
-        self.date_type = date_type
-        self.weather = weather
-        self.operation_type = operation_type
-        self.event_scale = event_scale
+        self.pflow_in = pflow_in
+        # self.date_type = date_type
+        # self.weather = weather
+        # self.operation_type = operation_type
+        # self.event_scale = event_scale
 
     # def p(self):
     #     # self.pflow_in........
@@ -34,7 +43,12 @@ class DataPointProperties:
 # 包括一天的数据点，长度由时间粒度决定，粒度为一天，则长度为1，粒度为15分钟，则长度为96/72
 @dataclass
 class DailyRecord:
-    points: list
+
+    def __init__(self, time):
+        self.time = time
+        self.datapoints: List[DataPointProperties] = []
+
+    # points: list
     # freq:int
 
     # # 返回内部所有点位的属性的拼接

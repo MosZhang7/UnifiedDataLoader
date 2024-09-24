@@ -1,17 +1,25 @@
 from datetime import datetime, date, time, timedelta
+import json
 import re
 from typing import Union
+import pandas as pd
+
+from DataStructures import DailyRecord, DataPointProperties
 
 
-class MakeObject:
-    def __init__(self) -> None:
-        pass
-
-    def make_DataPointProperties():
-        pass
-
-    def make_DailyRecord(self, DataPointProperties):
-        pass
+def choose_configuration(config_name):
+    config_file = json.load(open("./config.json", "r"))
+    configurations = config_file["configurations"]
+    for config in configurations:
+        if config["name"] == config_name:
+            print(
+                "Using config {} | app version:{}".format(
+                    config_name, config_file["version"]
+                )
+            )
+            return config
+    print("Can not find config {}, will use the first config!".format(config_name))
+    return configurations[0]
 
 
 """
@@ -59,3 +67,44 @@ def parse_to_timestamp(timestamp_str: str) -> Union[datetime, date, time]:
 
     # 如果无法匹配，返回 None
     return None
+
+
+# 传入可变数量的list，判断长度是否全部相等
+def check_equal_length(*lists):
+    if not lists:
+        return False  # 如果没有传入任何列表，返回 True（空输入视为长度相等）
+
+    # 获取第一个列表的长度
+    first_length = len(lists[0])
+
+    # 判断所有列表的长度是否与第一个列表相同
+    return all(len(lst) == first_length for lst in lists)
+
+
+def series_to_list(*series: pd.Series):
+    return [s.tolist() for s in series]
+
+
+def group_datapoints_by_day(datapoints):
+    # 创建 DataFrame
+    df = pd.DataFrame(
+        {
+            "timestamp": [dp.timestamp for dp in datapoints],
+            "pflow_in": [dp.pflow_in for dp in datapoints],
+        }
+    )
+
+    # 按日期分组
+    df["date"] = df["timestamp"].dt.date
+    grouped = df.groupby("date")
+
+    daily_record_list = []
+    for date, group in grouped:
+        record = DailyRecord(date)
+        for _, row in group.iterrows():
+            record.datapoints.append(
+                DataPointProperties(row["timestamp"], row["pflow_in"])
+            )
+        daily_record_list.append(record)
+
+    return daily_record_list

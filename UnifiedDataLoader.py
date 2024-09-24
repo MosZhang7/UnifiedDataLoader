@@ -1,9 +1,9 @@
+import argparse
 from asyncio.windows_events import NULL
 from hmac import new
-from ConfigUtils import ConfigUtils
 from DataExtractor import DataExtractor
 from DataStructureUtils import *
-import DataStructureUtils
+import DataStructureUtils as du
 from DataStructures import *
 import time as TIME
 import json
@@ -32,59 +32,31 @@ class UnifiedDataLoader:
         pass
 
 
-def main():
-    config = json.load(open("./config.json", "r"))
-    configUtils = ConfigUtils(config)
-    raw_data = DataExtractor(config).load_data()
-    dp = MakeObject.make_DataPointProperties(raw_data,raw_data,raw_data)
-    dr = MakeObject.make_DailyRecord()
+def main(config_name):
+    
+    config = du.choose_configuration(config_name)
 
-    time_start = TIME.time()
-    print("time consume:", TIME.time() - time_start)
-    D = [
-        [1, 2, 3, 4, 5, 6, 7],
-        [2 + i for i in range(7)],
-        [3 + i for i in range(7)],
-        [4 + i for i in range(7)],
-        [5 + i for i in range(7)],
-        [6 + i for i in range(7)],
-    ]
-    T = [
-        [datetime(2023, 3, 31, 6, 0) + timedelta(minutes=15 * i) for i in range(7)],
-        [datetime(2023, 4, 1, 6, 0) + timedelta(minutes=15 * i) for i in range(7)],
-        [datetime(2023, 4, 2, 6, 0) + timedelta(minutes=15 * i) for i in range(7)],
-        [datetime(2024, 4, 3, 6, 0) + timedelta(minutes=15 * i) for i in range(7)],
-        [datetime(2024, 4, 4, 6, 0) + timedelta(minutes=15 * i) for i in range(7)],
-        [datetime(2024, 4, 5, 6, 0) + timedelta(minutes=15 * i) for i in range(7)],
-    ]
+    # DataExtractor需要根据一定条件提取出来需要的数据，例如根据时间排序、根据车站进行group
+    timestr, pflow_list = DataExtractor(config).load_data()
 
-    weather_info = [0, 2, 4, 1, 1, 3]
+    if du.check_equal_length(timestr, pflow_list) == False:
+        print("error source data lenth")
+        return
 
-    date_type_info = [0, 1, 2, 0, 1, 2, 3, 2]
-    all_T = [
-        date(2023, 3, 31),
-        date(2023, 4, 1),
-        date(2023, 4, 2),
-        date(2023, 4, 3),
-        date(2023, 4, 4),
-        date(2024, 4, 5),
-        date(2024, 4, 6),
-        date(2024, 4, 7),
-    ]
+    timecdp = TIME.time()
+    # 得到正确完整的原始数据后，应该转换为DataPointProperties列表
+    data_point_list = [DataPointProperties(du.parse_to_timestamp(a), b) for a, b in zip(timestr, pflow_list)]
+    print("timecdp:", TIME.time() - timecdp)
+
+    timecdr = TIME.time()
+    # 随后根据粒度转换为DailyRecord，且DailyRecord应提供一定的检查，例如长度跟粒度有关
+    daily_record_map = du.group_datapoints_by_day(data_point_list)
+    print("timecdr:", TIME.time() - timecdr)
+
+    print(daily_record_map)
 
     all_date_data_dict = {}  # 6 DailyRecord class instances
 
-    for i in range(len(D)):
-        daily_record = []
-        for j in range(len(D[0])):
-            data_point = DataPointProperties(
-                D[i][j], T[i][j], date_type_info[i], weather_info[i], None, None
-            )
-            daily_record.append(data_point)
-        daily_record_class = DailyRecord(daily_record)
-        all_date_data_dict[T[i][0].date()] = daily_record_class
-
-    # print(all_date_data_dict)
 
     predict_time = parse_to_timestamp("2024-04-06")
     date_ind = all_T.index(predict_time)
@@ -121,4 +93,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Choose a configuration in config.json")
+    parser.add_argument('name', type=str, help="configuration name in config.json")
+    
+    config_name = parser.parse_args().name
+    main(config_name)

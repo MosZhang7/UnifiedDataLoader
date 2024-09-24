@@ -1,3 +1,15 @@
 {
-    "data_path": "./resource/test_0628.csv"
+    "version": "1.0",
+    "configurations": [
+        {
+            "name": "c1",
+            "data_path": "./resource/test_0628.csv",
+            "time_interval": "15min"
+        },
+        {
+            "name": "c2",
+            "data_path": "./resource/test_0628.csv",
+            "time_interval": "1day"
+        }
+    ]
 }
