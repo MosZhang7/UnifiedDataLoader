@@ -39,22 +39,20 @@ def main(config_name):
     # DataExtractor需要根据一定条件提取出来需要的数据，例如根据时间排序、根据车站进行group
     raw_data_df = DataExtractor(config).load_data()
 
-    timecdr = TIME.time()
-    # 随后根据粒度转换为DailyRecord，且DailyRecord应提供一定的检查，例如长度跟粒度有关
+    # timecdr = TIME.time()
+    # 随后使用原始数据的DataFrame转换为DailyRecordMap，
+    # 且DailyRecord应提供一定的检查，例如长度跟粒度有关，缺失的能够自己补充
     daily_record_map = du.make_daily_record_map(raw_data_df)
-    print("timecdr:", TIME.time() - timecdr)
-
-    print(daily_record_map)
-
-    all_date_data_dict = {}  # 6 DailyRecord class instances
+    # print("timecdr:", TIME.time() - timecdr)
 
     # 发现有pd.to_datetime函数，考虑全局替换掉
-    pd.to_datetime
-    predict_time = parse_to_timestamp("2024-04-06")
-    date_ind = all_T.index(predict_time)
-    date_type = date_type_info[date_ind]
+    # pd.to_datetime
+    predict_time = parse_to_timestamp("2024-02-11")
+    # date_ind = all_T.index(predict_time)
+    date_type = get_data_type(predict_time)
+    print("predict date type: ", date_type)
 
-    if date_type == 1 or date_type == 2:
+    if date_type == DataType.FRIDAY or date_type == DataType.HOLIDAY:
         # 近期历史：14天
         # 历史节假日：节假日期间（？天）+节前历史14天
 
@@ -75,18 +73,22 @@ def main(config_name):
 
     else:
         # 近期历史：90天
-        his_len = 2
-        his_date_list = [
-            predict_time - timedelta(days=i) for i in range(his_len, 0, -1)
-        ]
-        for his_date in his_date_list:
-            oneday = all_date_data_dict[his_date.date()]
-            oneday.ext()
+        his_len = 2  # 从配置文件获得
+        # his_date_list = [
+        #     predict_time - timedelta(days=i) for i in range(his_len, 0, -1)
+        # ]
+        result = []
+        for i in range(his_len):
+            target_date = predict_time - timedelta(days=i)
+            result.extend(daily_record_map[target_date].concatenate())
+        print(result)
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Choose a configuration in config.json")
-    parser.add_argument('name', type=str, help="configuration name in config.json")
-    
+    parser = argparse.ArgumentParser(
+        description="Choose a configuration in config.json"
+    )
+    parser.add_argument("name", type=str, help="configuration name in config.json")
+
     config_name = parser.parse_args().name
     main(config_name)

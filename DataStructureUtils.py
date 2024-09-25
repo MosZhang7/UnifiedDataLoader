@@ -5,7 +5,7 @@ import re
 from typing import Union
 import pandas as pd
 
-from DataStructures import DailyRecord, DataPointProperties
+from DataStructures import DailyRecord, DataPointProperties, DataType
 
 
 def choose_configuration(config_name):
@@ -109,3 +109,8 @@ def make_daily_record_map(dataframe):
     #         )
 
     return daily_record_map
+
+
+# 计算返回日期类型，如节假日，工作日等
+def get_data_type(predict_time):
+    return DataType.WORKDAY

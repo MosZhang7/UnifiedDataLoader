@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from datetime import datetime, date
 from enum import Enum, auto
 from typing import List
+
+from pandas import Timestamp
 import DataStructureUtils as du
 
 from shapely import points
@@ -36,8 +38,8 @@ class DataPointProperties:
         # self.operation_type = operation_type
         # self.event_scale = event_scale
 
-    # def p(self):
-    #     # self.pflow_in........
+    def concatenate(self):
+        return list(self.__dict__.values())
 
 
 # 包括一天的数据点，长度由时间粒度决定，粒度为一天，则长度为1，粒度为15分钟，则长度为96/72
@@ -51,8 +53,9 @@ class DailyRecord:
     # points: list
     # freq:int
 
-    # # 返回内部所有点位的属性的拼接
-    # def ext():
-    #     x = []
-    #     for p in points:
-    #     # return x;
+    # 返回内部所有点位的属性的拼接
+    def concatenate(self):
+        x = []
+        for p in self.data_points:
+            x.extend(p.concatenate())
+        return x
