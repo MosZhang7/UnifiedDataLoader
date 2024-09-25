@@ -1,3 +1,4 @@
+from collections import defaultdict
 from datetime import datetime, date, time, timedelta
 import json
 import re
@@ -85,26 +86,26 @@ def series_to_list(*series: pd.Series):
     return [s.tolist() for s in series]
 
 
-def group_datapoints_by_day(datapoints):
-    # 创建 DataFrame
-    df = pd.DataFrame(
-        {
-            "timestamp": [dp.timestamp for dp in datapoints],
-            "pflow_in": [dp.pflow_in for dp in datapoints],
-        }
-    )
+def make_daily_record_map(dataframe):
 
     # 按日期分组
-    df["date"] = df["timestamp"].dt.date
-    grouped = df.groupby("date")
+    dataframe["date"] = pd.to_datetime(dataframe["query_time"]).dt.date
+    grouped = dataframe.groupby("date")
 
-    daily_record_list = []
-    for date, group in grouped:
-        record = DailyRecord(date)
-        for _, row in group.iterrows():
-            record.datapoints.append(
-                DataPointProperties(row["timestamp"], row["pflow_in"])
-            )
-        daily_record_list.append(record)
+    daily_record_map = defaultdict(DailyRecord)
 
-    return daily_record_list
+    for group_day, group in grouped:
+        # 使用 `values` 将 DataFrame 转换为 NumPy 数组，提升性能
+        data_points = [
+            DataPointProperties(row[0], row[1])
+            for row in group[["query_time", "inNums"]].values
+        ]
+        daily_record_map[group_day].data_points.extend(data_points)
+
+    # for group_day, group in grouped:
+    #     for _, row in group.iterrows():
+    #         daily_record_map[group_day].data_points.append(
+    #             DataPointProperties(row["query_time"], row["inNums"])
+    #         )
+
+    return daily_record_map

@@ -33,31 +33,23 @@ class UnifiedDataLoader:
 
 
 def main(config_name):
-    
+
     config = du.choose_configuration(config_name)
 
     # DataExtractor需要根据一定条件提取出来需要的数据，例如根据时间排序、根据车站进行group
-    timestr, pflow_list = DataExtractor(config).load_data()
-
-    if du.check_equal_length(timestr, pflow_list) == False:
-        print("error source data lenth")
-        return
-
-    timecdp = TIME.time()
-    # 得到正确完整的原始数据后，应该转换为DataPointProperties列表
-    data_point_list = [DataPointProperties(du.parse_to_timestamp(a), b) for a, b in zip(timestr, pflow_list)]
-    print("timecdp:", TIME.time() - timecdp)
+    raw_data_df = DataExtractor(config).load_data()
 
     timecdr = TIME.time()
     # 随后根据粒度转换为DailyRecord，且DailyRecord应提供一定的检查，例如长度跟粒度有关
-    daily_record_map = du.group_datapoints_by_day(data_point_list)
+    daily_record_map = du.make_daily_record_map(raw_data_df)
     print("timecdr:", TIME.time() - timecdr)
 
     print(daily_record_map)
 
     all_date_data_dict = {}  # 6 DailyRecord class instances
 
-
+    # 发现有pd.to_datetime函数，考虑全局替换掉
+    pd.to_datetime
     predict_time = parse_to_timestamp("2024-04-06")
     date_ind = all_T.index(predict_time)
     date_type = date_type_info[date_ind]

@@ -5,12 +5,21 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "UnifiedDataLoader",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "UnifiedDataLoader.py",
+            "console": "integratedTerminal",
+            "args": [
+                "12341"
+            ]
+        },
+        {
             "name": "Python Debugger: Current File",
             "type": "debugpy",
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "args": ["12341"]
         }
     ]
 }

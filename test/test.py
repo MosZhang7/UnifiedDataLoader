@@ -1,26 +1,32 @@
+import pandas as pd
+import time
 from DataStructureUtils import *
 
 
 def testD1_1():
     # 示例调用
     print(parse_to_timestamp("2024-09-10"))  # 输出：2024-09-10 (date对象)
+    print(pd.to_datetime("2024-09-10"))  # 输出：2024-09-10 (date对象)
     print(
         parse_to_timestamp("2024/09/10 06:00:00")
     )  # 输出：2024-09-10 06:00:00 (datetime对象)
     print(
-        parse_to_timestamp("20240910060000")
+        pd.to_datetime("2024/09/10 06:00:00")
     )  # 输出：2024-09-10 06:00:00 (datetime对象)
     print(
+        parse_to_timestamp("20240910060000")
+    )  # 输出：2024-09-10 06:00:00 (datetime对象)
+    print(pd.to_datetime("20240910060000"))  # 输出：2024-09-10 06:00:00 (datetime对象)
+    print(
         parse_to_timestamp("2024-01-31 23:55:00")
+    )  # 输出：2024-09-10 06:00:00 (datetime对象)
+    print(
+        pd.to_datetime("2024-01-31 23:55:00")
     )  # 输出：2024-09-10 06:00:00 (datetime对象)
     # assert a == date(2024,9,10)
 
 
-# testD1_1()
-
-
-import pandas as pd
-import time
+testD1_1()
 
 
 # 定义学生类
@@ -31,6 +37,7 @@ class Student:
 
     def __repr__(self):
         return f"Student(id={self.student_id}, score={self.score})"
+
 
 ft = time.time()
 

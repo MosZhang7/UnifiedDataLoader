@@ -44,9 +44,9 @@ class DataPointProperties:
 @dataclass
 class DailyRecord:
 
-    def __init__(self, time):
-        self.time = time
-        self.datapoints: List[DataPointProperties] = []
+    def __init__(self):
+        # self.time = time
+        self.data_points: List[DataPointProperties] = []
 
     # points: list
     # freq:int
