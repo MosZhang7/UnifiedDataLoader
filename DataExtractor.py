@@ -1,4 +1,3 @@
-import json
 import pandas as pd
 import DataStructureUtils as du
 
@@ -11,16 +10,21 @@ class DataExtractor:
     def load_data(self):
         cols = ["query_time", "inNums"]
         df = CSVExtractor(self.data_path).load(cols)
-        print("read query_time | inNums from {}".format(self.data_path))
+        print("get columns{} from [{}]".format(cols, self.data_path))
 
         # weather = CSVExtractor(self.path).load()
+        # print("get columns{} from [{}]".format(cols, self.data_path))
         # operation_type = SQLQueryBuilder()
-        # return data, weather, operation_type
+        # print("get [operation_type] by execute SQL {}".format(self.data_path))
 
         # if du.check_equal_length(time_series, pflow_series) == False:
         #     print("error source data lenth!")
         #     # 也可以选择在这里填充缺失的值
         #     exit()
+
+        print("final df struct:*************")
+        print(df.head())
+        print("final df struct:*************")
 
         return df
 

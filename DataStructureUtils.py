@@ -11,15 +11,12 @@ from DataStructures import DailyRecord, DataPointProperties, DataType
 def choose_configuration(config_name):
     config_file = json.load(open("./config.json", "r"))
     configurations = config_file["configurations"]
+    print("\nUnifiedDataLoader version[{}] Start!\n".format(config_file["version"]))
     for config in configurations:
         if config["name"] == config_name:
-            print(
-                "Using config {} | app version:{}".format(
-                    config_name, config_file["version"]
-                )
-            )
+            print("Using config [{}]".format(config_name))
             return config
-    print("Can not find config {}, will use the first config!".format(config_name))
+    print("Can not find config [{}], use the first config!".format(config_name))
     return configurations[0]
 
 
@@ -86,27 +83,27 @@ def series_to_list(*series: pd.Series):
     return [s.tolist() for s in series]
 
 
-def make_daily_record_map(dataframe):
+# 使用原始数据的DataFrame转换为DailyRecordMap
+# 为了方便程序最终的输出，data_type这种本应属于`DailyRecord`的也被添加到`DataPointProperties`，
+# 后续如果需要考虑内存、性能因素，可以在`DataExtractor.load()`处针对dp和dr分别返回`DataFrame`
+def make_daily_record_map(dataframe: pd.DataFrame):
 
+    dp_prop = dataframe.columns.tolist()
     # 按日期分组
     dataframe["date"] = pd.to_datetime(dataframe["query_time"]).dt.date
     grouped = dataframe.groupby("date")
 
+    # 筛选、填充等操作
+    # ...
     daily_record_map = defaultdict(DailyRecord)
 
     for group_day, group in grouped:
-        # 使用 `values` 将 DataFrame 转换为 NumPy 数组，提升性能
+        # data_type这种本应该属于DailyRecord的属性可以为了方便，全都加到DataPointProperties里
         data_points = [
-            DataPointProperties(row[0], row[1])
-            for row in group[["query_time", "inNums"]].values
+            DataPointProperties(**{prop: row[i] for i, prop in enumerate(dp_prop)})
+            for row in group[dp_prop].values
         ]
         daily_record_map[group_day].data_points.extend(data_points)
-
-    # for group_day, group in grouped:
-    #     for _, row in group.iterrows():
-    #         daily_record_map[group_day].data_points.append(
-    #             DataPointProperties(row["query_time"], row["inNums"])
-    #         )
 
     return daily_record_map
 

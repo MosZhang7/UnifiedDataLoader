@@ -1,49 +1,33 @@
 import argparse
-from asyncio.windows_events import NULL
-from hmac import new
 from DataExtractor import DataExtractor
 from DataStructureUtils import *
-import DataStructureUtils as du
 from DataStructures import *
 import time as TIME
-import json
 import pandas as pd
 
-import DataStructures
 
-# global MIN_NUM
-# MIN_NUM = {function,
-#            function}
+"""
+功能：
+    1、能从csv里读取
 
-
-class UnifiedDataLoader:
-    """
-    功能：
-        1、能从csv里读取
-
-        2、能从不同的数据库里读取
-            （1）连接不同的数据库
-            （2）SQL语句的拼接：写在不同函数里，不同类型的项目调用不同函数（要用一个单独的类处理）
-            （3）执行SQL语句获取数据
-        3、 1，2步骤得到方便处理的各种类(结构体)
-    """
-
-    def __init__(self):
-        pass
+    2、能从不同的数据库里读取
+        （1）连接不同的数据库
+        （2）SQL语句的拼接：写在不同函数里，不同类型的项目调用不同函数（要用一个单独的类处理）
+        （3）执行SQL语句获取数据
+    3、 1，2步骤得到方便处理的各种类(结构体)
+"""
 
 
 def main(config_name):
+    config = choose_configuration(config_name)
 
-    config = du.choose_configuration(config_name)
-
-    # DataExtractor需要根据一定条件提取出来需要的数据，例如根据时间排序、根据车站进行group
+    # DataExtractor需要根据一定条件提取出来需要的数据
     raw_data_df = DataExtractor(config).load_data()
 
-    # timecdr = TIME.time()
-    # 随后使用原始数据的DataFrame转换为DailyRecordMap，
-    # 且DailyRecord应提供一定的检查，例如长度跟粒度有关，缺失的能够自己补充
-    daily_record_map = du.make_daily_record_map(raw_data_df)
-    # print("timecdr:", TIME.time() - timecdr)
+    timecdr = TIME.time()
+    # DailyRecord应提供一定的处理检查，例如根据时间排序、根据车站进行group，长度跟粒度有关，缺失的能够自己补充等
+    daily_record_map = make_daily_record_map(raw_data_df)
+    print("timecdr:", TIME.time() - timecdr)
 
     # 发现有pd.to_datetime函数，考虑全局替换掉
     # pd.to_datetime
